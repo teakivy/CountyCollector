@@ -17,6 +17,8 @@ const darkIvyTheme: Theme = {
 		secondaryBackgroundColor: '#1f1b29',
 		textColor: '#ffffff',
 		secondaryTextColor: '#90a4ae',
+		darkSecondaryTextColor: '#697880',
+		darkerSecondaryTextColor: '#455157',
 		primaryColor: '#b075eb',
 	},
 };

@@ -2,7 +2,6 @@ import { StyleSheet, View } from 'react-native';
 
 import React, { useMemo, useState } from 'react';
 import MapView, { Geojson } from 'react-native-maps';
-import { simplify } from '@turf/turf';
 
 // import countyBoundaries from './../../assets/counties.json';
 import countyBoundaries from './../../assets/us-county-boundaries-simple.json';

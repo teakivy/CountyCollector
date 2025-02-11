@@ -77,7 +77,7 @@ class DatabaseManager {
 
 			return null;
 		} catch (error) {
-			console.error('Error getting email by username:', error);
+			console.log('Error getting email by username:', error);
 			return null;
 		}
 	}

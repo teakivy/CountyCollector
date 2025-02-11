@@ -15,6 +15,8 @@ type Theme = {
 		secondaryBackgroundColor: string;
 		textColor: string;
 		secondaryTextColor: string;
+		darkSecondaryTextColor: string;
+		darkerSecondaryTextColor: string;
 		primaryColor: string;
 	};
 };

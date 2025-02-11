@@ -37,4 +37,12 @@ type Visit = {
 
 type AppUserAccountType = 'email' | 'apple' | 'google';
 
-export { AppUser, Device, Visit, AppUserAccountType };
+type SignUpUserOptions = {
+	email: string;
+	password: string;
+	username: string;
+	displayName: string;
+	accountType: AppUserAccountType;
+};
+
+export { AppUser, Device, Visit, AppUserAccountType, SignUpUserOptions };

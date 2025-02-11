@@ -1,10 +1,6 @@
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -12,15 +8,12 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AuthManager from '@/core/AuthManager';
-import Welcome from './welcome/welcome';
-
-import SignUp from './welcome/signup';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme();
 	const [loaded] = useFonts({
 		SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
 	});
@@ -32,7 +25,16 @@ export default function RootLayout() {
 			SplashScreen.hideAsync();
 
 			// Check if user is logged in
-			setIsLoggedIn(AuthManager.isLoggedIn());
+
+			onAuthStateChanged(AuthManager.getAuth(), (user) => {
+				if (user) {
+					setIsLoggedIn(true);
+					router.replace('/(tabs)');
+				} else {
+					setIsLoggedIn(false);
+					router.replace('/welcome/welcome');
+				}
+			});
 		}
 	}, [loaded]);
 
@@ -42,14 +44,21 @@ export default function RootLayout() {
 
 	return (
 		<ThemeProvider value={DarkTheme}>
-			{isLoggedIn ? (
-				<Stack>
-					<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-					<Stack.Screen name='+not-found' />
-				</Stack>
-			) : (
-				<SignUp />
-			)}
+			<Stack>
+				<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+				<Stack.Screen name='+not-found' />
+				<Stack.Screen name='welcome/welcome' options={{ headerShown: false }} />
+				<Stack.Screen name='welcome/signup' options={{ headerShown: false }} />
+				<Stack.Screen
+					name='welcome/setupProfile'
+					options={{ headerShown: false }}
+				/>
+				<Stack.Screen name='welcome/login' options={{ headerShown: false }} />
+				<Stack.Screen
+					name='welcome/forgotpassword'
+					options={{ headerShown: false }}
+				/>
+			</Stack>
 			<StatusBar style='auto' />
 		</ThemeProvider>
 	);

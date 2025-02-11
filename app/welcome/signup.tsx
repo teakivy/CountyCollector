@@ -1,18 +1,20 @@
+import BackButton from '@/components/BackButton';
 import Input from '@/components/Input';
 import RoundedButton from '@/components/RoundedButton';
 import DatabaseManager from '@/core/DatabaseManager';
+import { getTheme } from '@/core/themes/ThemeProvider';
 import { filterValidCharacters, isValidEmail } from '@/core/utils';
-import React, { useState, useRef } from 'react';
+import { router } from 'expo-router';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TextInput, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Signup() {
-	const [username, setUsername] = useState('');
+	const theme = getTheme();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 
-	const [usernameValid, setUsernameValid] = useState(false);
 	const [emailValid, setEmailValid] = useState(false);
 	const [passwordValid, setPasswordValid] = useState(false);
 	const [confirmPasswordValid, setConfirmPasswordValid] = useState(false);
@@ -21,52 +23,20 @@ export default function Signup() {
 	const passwordRef = useRef<TextInput>(null);
 	const confirmPasswordRef = useRef<TextInput>(null);
 
+	useEffect(() => {
+		setTimeout(() => {
+			emailRef.current?.focus();
+		}, 100);
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<SafeAreaView>
+				<View style={styles.backButton}>
+					<BackButton color={theme.ui.primaryColor} />
+				</View>
 				<Text style={styles.createText}>Create your account</Text>
-				<Input
-					value={username}
-					onChangeText={(u) => {
-						setUsername(
-							filterValidCharacters(
-								u.toLowerCase(),
-								new Set('abcdefghijklmnopqrstuvwxyz0123456789_.-')
-							)
-						);
-					}}
-					disableAutoCorrect
-					autoCapitalize='none'
-					placeholder='Username'
-					autoComplete='off'
-					textColor='white'
-					outlineColor='gray'
-					validate={async (text) => {
-						if (!text) {
-							setUsernameValid(false);
-							return null;
-						}
-						if (text.length < 3) {
-							setUsernameValid(false);
-							return 'Username must be at least 3 characters long';
-						}
-						if (text.length > 16) {
-							setUsernameValid(false);
-							return 'Username must be at most 16 characters long';
-						}
-						if (await DatabaseManager.doesUsernameExist(text)) {
-							setUsernameValid(false);
-							return 'Username already in use';
-						} else {
-							setUsernameValid(true);
-							return null;
-						}
-					}}
-					returnKeyType='next'
-					onSubmitEditing={() => {
-						emailRef.current?.focus(); // Focus email input
-					}}
-				/>
+
 				<Input
 					ref={emailRef}
 					value={email}
@@ -82,8 +52,9 @@ export default function Signup() {
 					autoCapitalize='none'
 					placeholder='Email'
 					autoComplete='email'
-					textColor='white'
-					outlineColor='gray'
+					textColor={theme.ui.textColor}
+					focusedOutlineColor={theme.ui.primaryColor}
+					outlineColor={theme.ui.darkSecondaryTextColor}
 					keyboardType='email-address'
 					validate={async (text) => {
 						if (!text) {
@@ -118,8 +89,9 @@ export default function Signup() {
 					autoCapitalize='none'
 					placeholder='Password'
 					autoComplete='password'
-					textColor='white'
-					outlineColor='gray'
+					textColor={theme.ui.textColor}
+					focusedOutlineColor={theme.ui.primaryColor}
+					outlineColor={theme.ui.darkSecondaryTextColor}
 					secureTextEntry={true}
 					validate={async (text) => {
 						if (!text) {
@@ -149,8 +121,9 @@ export default function Signup() {
 					autoCapitalize='none'
 					placeholder='Confirm Password'
 					autoComplete='password'
-					textColor='white'
-					outlineColor='gray'
+					textColor={theme.ui.textColor}
+					focusedOutlineColor={theme.ui.primaryColor}
+					outlineColor={theme.ui.darkSecondaryTextColor}
 					secureTextEntry={true}
 					validate={(text) => {
 						if (!text) {
@@ -171,16 +144,17 @@ export default function Signup() {
 				/>
 
 				<RoundedButton
-					title='Sign Up'
-					onPress={() => {}}
+					title='Continue'
+					onPress={() => {
+						router.push(
+							`/welcome/setupProfile?email=${encodeURIComponent(
+								email
+							)}&password=${encodeURIComponent(password)}`
+						);
+					}}
 					backgroundColor='white'
 					textColor='black'
-					disabled={
-						!usernameValid ||
-						!emailValid ||
-						!passwordValid ||
-						!confirmPasswordValid
-					}
+					disabled={!emailValid || !passwordValid || !confirmPasswordValid}
 				/>
 			</SafeAreaView>
 		</View>
@@ -191,7 +165,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
-		backgroundColor: '#1a1a1a',
+		backgroundColor: getTheme().ui.backgroundColor,
 		gap: 20,
 	},
 	createText: {
@@ -200,5 +174,9 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		marginBottom: 30,
 		marginTop: 20,
+	},
+	backButton: {
+		position: 'absolute',
+		top: 40,
 	},
 });

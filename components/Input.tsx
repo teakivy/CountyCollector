@@ -1,3 +1,4 @@
+import { getTheme } from '@/core/themes/ThemeProvider';
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import {
 	Animated,
@@ -22,6 +23,8 @@ interface InputProps {
 	secureTextEntry?: boolean;
 	textColor?: string;
 	outlineColor?: string;
+	focusedOutlineColor?: string;
+	backgroundColor?: string;
 	validate?: (text: string) => Promise<string | null> | string | null;
 	returnKeyType?: ReturnKeyTypeOptions;
 	onSubmitEditing?: () => void;
@@ -41,25 +44,36 @@ const Input = forwardRef<TextInput, InputProps>(
 			secureTextEntry = false,
 			textColor = 'white',
 			outlineColor = 'white',
+			focusedOutlineColor = 'white',
 			validate,
 			returnKeyType = 'default',
 			onSubmitEditing,
 			keyboardType = 'default',
+			backgroundColor = getTheme().ui.backgroundColor,
 		},
 		ref
 	) => {
 		const labelPosition = useRef(new Animated.Value(value ? 1 : 0)).current;
+		const borderAnimation = useRef(new Animated.Value(value ? 1 : 0)).current;
 
 		const [error, setError] = useState<string | null>(null);
 		const [isPasswordVisible, setPasswordVisible] = useState(false);
 
+		const [isFocused, setFocused] = useState(false);
+
 		useEffect(() => {
 			Animated.timing(labelPosition, {
-				toValue: value ? 1 : 0,
+				toValue: value.length > 0 ? 1 : 0,
 				duration: 100,
 				useNativeDriver: false,
 			}).start();
-		}, [value]);
+
+			Animated.timing(borderAnimation, {
+				toValue: isFocused ? 1 : 0,
+				duration: 200,
+				useNativeDriver: false,
+			}).start();
+		}, [value, isFocused]);
 
 		const labelStyle = {
 			top: labelPosition.interpolate({
@@ -72,12 +86,30 @@ const Input = forwardRef<TextInput, InputProps>(
 			}),
 		};
 
+		const borderStyle = {
+			borderColor: borderAnimation.interpolate({
+				inputRange: [0, 1],
+				outputRange: [outlineColor, focusedOutlineColor],
+			}),
+			color: borderAnimation.interpolate({
+				inputRange: [0, 1],
+				outputRange: [outlineColor, focusedOutlineColor],
+			}),
+		};
+
 		return (
 			<TouchableWithoutFeedback onPress={() => (ref as any)?.current?.focus()}>
 				<View>
-					<View style={[styles.container, { borderColor: outlineColor }]}>
+					<Animated.View style={[styles.container, borderStyle]}>
 						<Animated.Text
-							style={[styles.label, labelStyle, { color: outlineColor }]}
+							style={[
+								styles.label,
+								labelStyle,
+								{
+									backgroundColor: backgroundColor,
+								},
+								borderStyle,
+							]}
 						>
 							{placeholder}
 						</Animated.Text>
@@ -101,6 +133,8 @@ const Input = forwardRef<TextInput, InputProps>(
 								returnKeyType={returnKeyType}
 								onSubmitEditing={onSubmitEditing}
 								keyboardType={keyboardType}
+								onFocus={() => setFocused(true)}
+								onBlur={() => setFocused(false)}
 							/>
 							{secureTextEntry && (
 								<TouchableOpacity
@@ -115,9 +149,9 @@ const Input = forwardRef<TextInput, InputProps>(
 								</TouchableOpacity>
 							)}
 						</View>
-					</View>
+					</Animated.View>
 					<View style={styles.errorContainer}>
-						{error && <Text style={{ color: '#b53636' }}>{error}</Text>}
+						{error && <Text style={{ color: '#e34d5a' }}>{error}</Text>}
 					</View>
 				</View>
 			</TouchableWithoutFeedback>
@@ -130,10 +164,8 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		justifyContent: 'center',
 		padding: 15,
-		backgroundColor: '#1a1a1a',
 		borderRadius: 15,
 		borderWidth: 2,
-		borderColor: 'white',
 	},
 	label: {
 		position: 'absolute',

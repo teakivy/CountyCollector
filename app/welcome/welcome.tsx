@@ -7,6 +7,7 @@ import BackgroundCircles from '@/components/Welcome/BackgroundCircles';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import AuthManager from '@/core/AuthManager';
 import UserManager from '@/core/UserManager';
+import { Link, router } from 'expo-router';
 
 export default function welcome() {
 	const theme = getTheme();
@@ -42,29 +43,16 @@ export default function welcome() {
 				<View style={styles.buttonContainer}>
 					<RoundedButton
 						title='Login'
-						onPress={() => {}}
+						onPress={() => {
+							router.push('/welcome/login');
+						}}
 						backgroundColor={theme.button.secondary.backgroundColor}
 						textColor={theme.button.secondary.textColor}
 					/>
 					<RoundedButton
 						title='Sign Up'
 						onPress={async () => {
-							let user = await AuthManager.signUp(
-								'example@test.com',
-								'password123'
-							);
-							console.log(user?.uid);
-							if (user == null) {
-								console.log('Failed to sign up');
-								return;
-							}
-							await UserManager.createUserData(
-								user.uid,
-								'example@test.com',
-								'example',
-								'Example User',
-								'email'
-							);
+							router.push('/welcome/signup');
 						}}
 						backgroundColor={theme.button.primary.backgroundColor}
 						textColor={theme.button.primary.textColor}
@@ -77,7 +65,9 @@ export default function welcome() {
 
 					<TouchableOpacity
 						style={[styles.appleButton, { backgroundColor: '#000000' }]}
-						onPress={() => {}}
+						onPress={() => {
+							console.log(AuthManager.isLoggedIn());
+						}}
 						activeOpacity={0.8}
 					>
 						<AntDesign name='apple1' size={24} color='white' />
@@ -134,12 +124,12 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	horizontalLine: {
-		borderBottomColor: getTheme().ui.secondaryTextColor + '50',
+		borderBottomColor: getTheme().ui.darkerSecondaryTextColor,
 		borderBottomWidth: 1,
 		width: '30%',
 	},
 	signUpOr: {
-		color: getTheme().ui.secondaryTextColor + 'f0',
+		color: getTheme().ui.darkSecondaryTextColor,
 		fontSize: 14,
 		marginBottom: 2,
 	},

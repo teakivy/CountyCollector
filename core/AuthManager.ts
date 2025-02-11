@@ -1,19 +1,20 @@
 import {
-	getAuth,
 	signInWithEmailAndPassword,
 	createUserWithEmailAndPassword,
 	signOut,
 	onAuthStateChanged,
 	User,
 	sendPasswordResetEmail,
+	Auth,
 } from 'firebase/auth';
-import { app } from './Firebase';
-import { AppUser } from '@/types/UserTypes';
+import { auth } from './Firebase';
+import { AppUser, SignUpUserOptions } from '@/types/UserTypes';
 
 import DatabaseManager from './DatabaseManager';
+import UserManager from './UserManager';
 
 class AuthManager {
-	private auth = getAuth(app);
+	private auth = auth;
 
 	/**
 	 * Sign up a new user
@@ -21,12 +22,20 @@ class AuthManager {
 	 * @param password - User's password
 	 * @returns User object if successful, null otherwise
 	 */
-	async signUp(email: string, password: string): Promise<User | null> {
+	async signUp(userOptions: SignUpUserOptions): Promise<User | null> {
 		try {
 			const userCredential = await createUserWithEmailAndPassword(
 				this.auth,
-				email,
-				password
+				userOptions.email,
+				userOptions.password
+			);
+
+			UserManager.createUserData(
+				userCredential.user.uid,
+				userOptions.email,
+				userOptions.username,
+				userOptions.displayName,
+				userOptions.accountType
 			);
 			console.log('User signed up:', userCredential.user);
 			return userCredential.user;
@@ -55,6 +64,36 @@ class AuthManager {
 			console.error('Error logging in:', error);
 			return null;
 		}
+	}
+
+	/**
+	 * Log in a user using email or username
+	 * @param emailOrUsername Email or username
+	 * @param password Password
+	 * @returns A user object if successful, null otherwise
+	 */
+	async handleLogin(
+		emailOrUsername: string,
+		password: string
+	): Promise<User | null> {
+		let isEmail = emailOrUsername.includes('@');
+		let user: User | null;
+		if (isEmail) {
+			user = await this.login(emailOrUsername, password);
+		} else {
+			let email = await DatabaseManager.getEmailByUsername(emailOrUsername);
+			if (email) {
+				user = await this.login(email, password);
+			} else {
+				console.error('Username not found');
+				return null;
+			}
+		}
+		if (!user) {
+			console.error('Error logging in');
+			return null;
+		}
+		return user;
 	}
 
 	/**
@@ -97,6 +136,7 @@ class AuthManager {
 	 * @returns boolean - True if user is logged in, false otherwise
 	 */
 	isLoggedIn(): boolean {
+		console.log(this.auth.currentUser);
 		return this.auth.currentUser !== null;
 	}
 
@@ -131,6 +171,14 @@ class AuthManager {
 			return await DatabaseManager.getDocument<AppUser>('users', user.uid);
 		}
 		return null;
+	}
+
+	/**
+	 * Get the Auth object
+	 * @returns Auth object
+	 */
+	getAuth(): Auth {
+		return this.auth;
 	}
 }
 

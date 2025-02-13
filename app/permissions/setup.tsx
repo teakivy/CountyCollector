@@ -4,11 +4,10 @@ import RoundedButton from '@/components/RoundedButton';
 import { getTheme } from '@/core/themes/ThemeProvider';
 import { LinearGradient } from 'expo-linear-gradient';
 import BackgroundCircles from '@/components/Welcome/BackgroundCircles';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import AuthManager from '@/core/AuthManager';
 import { Link, router } from 'expo-router';
+import PermissionManager from '@/core/PermissionManager';
 
-export default function welcome() {
+export default function setup() {
 	const theme = getTheme();
 
 	return (
@@ -27,53 +26,59 @@ export default function welcome() {
 			>
 				<BackgroundCircles />
 				<View style={styles.welcomeTextContainer}>
-					<Image
-						source={require('@/assets/images/countyCollectorIcon.png')}
-						style={styles.appIcon}
-					/>
-					<Text style={styles.welcomeText}>Welcome to</Text>
-					<Text style={[styles.welcomeText, styles.welcomeTextAppName]}>
-						County Collector
-					</Text>
+					<Text style={styles.welcomeText}>Finish Setting Up</Text>
 					<Text style={styles.welcomeTextDescription}>
-						Track your trips and collect locations
+						Some permissions are required for County Collector to function
+						properly.
 					</Text>
+				</View>
+				<View style={styles.permissionContainer}>
+					<View style={styles.permissionLine}>
+						<Text style={styles.permissionText}>Notifications</Text>
+						<Text style={styles.permissionDescription}>
+							Receive notifications when you visit a new county.
+						</Text>
+					</View>
+
+					<View style={styles.permissionLine}>
+						<Text style={styles.permissionText}>Location</Text>
+						<Text style={styles.permissionDescription}>
+							Used to automatically collect counties you visit.
+						</Text>
+					</View>
 				</View>
 				<View style={styles.buttonContainer}>
 					<RoundedButton
-						title='Login'
-						onPress={() => {
-							router.push('/welcome/login');
+						title='Allow'
+						onPress={async () => {
+							let notifications =
+								await PermissionManager.requestNotificationPermission();
+							let location =
+								await PermissionManager.requestLocationPermission();
+							let backgroundLocation =
+								await PermissionManager.requestBackgroundLocationPermission();
+
+							async function checkPermission() {
+								let backgroundStatus =
+									await PermissionManager.getBackgroundLocationPermission();
+
+								if (backgroundStatus) {
+									router.navigate('/(tabs)/home');
+								}
+							}
+							setInterval(checkPermission, 500);
 						}}
 						backgroundColor={theme.button.secondary.backgroundColor}
 						textColor={theme.button.secondary.textColor}
 					/>
 					<RoundedButton
-						title='Sign Up'
+						title='Set Up Later'
 						onPress={async () => {
-							router.push('/welcome/signup');
+							router.navigate('/(tabs)/home');
 						}}
 						backgroundColor={theme.button.primary.backgroundColor}
 						textColor={theme.button.primary.textColor}
 					/>
-					<View style={styles.otherOptionsOr}>
-						<View style={styles.horizontalLine}></View>
-						<Text style={styles.signUpOr}>or</Text>
-						<View style={styles.horizontalLine}></View>
-					</View>
-
-					<TouchableOpacity
-						style={[styles.appleButton, { backgroundColor: '#000000' }]}
-						onPress={() => {
-							console.log(AuthManager.isLoggedIn());
-						}}
-						activeOpacity={0.8}
-					>
-						<AntDesign name='apple1' size={24} color='white' />
-						<Text style={[styles.appleText, { color: 'white' }]}>
-							Continue with Apple
-						</Text>
-					</TouchableOpacity>
 				</View>
 			</LinearGradient>
 		</View>
@@ -151,5 +156,24 @@ const styles = StyleSheet.create({
 	appleText: {
 		fontSize: 20,
 		fontWeight: '700',
+	},
+	permissionLine: {
+		marginVertical: 20,
+	},
+	permissionText: {
+		color: getTheme().ui.primaryColor,
+		fontSize: 26,
+		marginLeft: 12,
+		fontWeight: '700',
+		marginBottom: 4,
+	},
+	permissionDescription: {
+		color: getTheme().ui.textColor,
+		fontSize: 18,
+		marginLeft: 12,
+		fontWeight: '400',
+	},
+	permissionContainer: {
+		marginTop: -50,
 	},
 });

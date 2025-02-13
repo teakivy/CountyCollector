@@ -1,8 +1,10 @@
 import BackButton from '@/components/BackButton';
 import Input from '@/components/Input';
 import RoundedButton from '@/components/RoundedButton';
+import AuthManager from '@/core/AuthManager';
 import { getTheme } from '@/core/themes/ThemeProvider';
 import { filterValidCharacters, isValidEmail } from '@/core/utils';
+import { router } from 'expo-router';
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TextInput, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -64,8 +66,11 @@ export default function Login() {
 				/>
 
 				<RoundedButton
-					title='Login'
-					onPress={() => {}}
+					title='Continue'
+					onPress={() => {
+						AuthManager.resetPassword(email);
+						router.replace('/welcome/resetpasswordsent');
+					}}
 					backgroundColor='white'
 					textColor='black'
 					disabled={!emailValid}

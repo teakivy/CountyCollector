@@ -115,12 +115,7 @@ class AuthManager {
 	 * @returns void
 	 */
 	async resetPassword(email: string): Promise<void> {
-		try {
-			await sendPasswordResetEmail(this.auth, email);
-			console.log('Password reset email sent');
-		} catch (error) {
-			console.error('Error sending password reset email:', error);
-		}
+		await sendPasswordResetEmail(this.auth, email);
 	}
 
 	/**

@@ -3,6 +3,7 @@ import Input from '@/components/Input';
 import RoundedButton from '@/components/RoundedButton';
 import AuthManager from '@/core/AuthManager';
 import DatabaseManager from '@/core/DatabaseManager';
+import PermissionManager from '@/core/PermissionManager';
 import { getTheme } from '@/core/themes/ThemeProvider';
 import { filterValidCharacters, isValidEmail } from '@/core/utils';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -134,7 +135,11 @@ export default function Signup() {
 							accountType: 'email',
 						});
 						if (user != null) {
-							router.replace('/(tabs)');
+							if (await PermissionManager.checkPermissions()) {
+								router.replace('/(tabs)/home');
+							} else {
+								router.replace('/permissions/setup');
+							}
 						}
 					}}
 					backgroundColor='white'

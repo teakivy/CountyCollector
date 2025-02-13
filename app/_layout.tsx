@@ -16,6 +16,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
 	const [loaded] = useFonts({
 		SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+		Noopla: require('../assets/fonts/NooplaRegular.ttf'),
 	});
 
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,7 +30,7 @@ export default function RootLayout() {
 			onAuthStateChanged(AuthManager.getAuth(), (user) => {
 				if (user) {
 					setIsLoggedIn(true);
-					router.replace('/(tabs)');
+					router.replace('/(tabs)/home');
 				} else {
 					setIsLoggedIn(false);
 					router.replace('/welcome/welcome');
@@ -56,6 +57,14 @@ export default function RootLayout() {
 				<Stack.Screen name='welcome/login' options={{ headerShown: false }} />
 				<Stack.Screen
 					name='welcome/forgotpassword'
+					options={{ headerShown: false }}
+				/>
+				<Stack.Screen
+					name='welcome/resetpasswordsent'
+					options={{ headerShown: false }}
+				/>
+				<Stack.Screen
+					name='permissions/setup'
 					options={{ headerShown: false }}
 				/>
 			</Stack>

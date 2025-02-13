@@ -8,13 +8,14 @@ import Mapbox, {
 	ShapeSource,
 } from '@rnmapbox/maps';
 import { Component } from 'react';
-import countyGeojson from './../../assets/us-county-boundaries-simple.json';
-import canadaCensusGeojson from './../../assets/CA-census-subdivisions.json';
-import ukCountyGeojson from './../../assets/UK-counties.json';
+import countyGeojson from '../../assets/us-county-boundaries-simple.json';
+import canadaCensusGeojson from '../../assets/CA-census-subdivisions.json';
+import ukCountyGeojson from '../../assets/UK-counties.json';
+import { getTheme } from '@/core/themes/ThemeProvider';
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_API_KEY || '');
 
-export default class TabTwoScreen extends Component {
+export default class MapScreen extends Component {
 	componentDidMount() {
 		Mapbox.setTelemetryEnabled(false);
 	}
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
 	container: {
 		height: '100%',
 		width: '100%',
-		backgroundColor: 'tomato',
+		backgroundColor: getTheme().ui.backgroundColor,
 	},
 	map: {
 		flex: 1,

@@ -2,6 +2,7 @@ import BackButton from '@/components/BackButton';
 import Input from '@/components/Input';
 import RoundedButton from '@/components/RoundedButton';
 import AuthManager from '@/core/AuthManager';
+import PermissionManager from '@/core/PermissionManager';
 import { getTheme } from '@/core/themes/ThemeProvider';
 import { filterValidCharacters } from '@/core/utils';
 import { router } from 'expo-router';
@@ -89,7 +90,11 @@ export default function Login() {
 					onPress={async () => {
 						let user = await AuthManager.handleLogin(username, password);
 						if (user) {
-							router.replace('/(tabs)');
+							if (await PermissionManager.checkPermissions()) {
+								router.replace('/(tabs)/home');
+							} else {
+								router.replace('/permissions/setup');
+							}
 						} else {
 							Alert.alert('Login failed', 'Invalid username or password');
 						}
